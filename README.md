@@ -75,5 +75,5 @@ python simulator.py
 👤 作者 | Author
 
 禹寬 (YU KUAN)
-📧 Email: U1222342@365.nuu.edu.tw
+📧 Email: U1222342@o365.nuu.edu.tw
 🌐 GitHub: https://github.com/rickyliu0219
