@@ -72,7 +72,7 @@ python simulator.py
 
 ---
 
-## 4️⃣ 外網分享 | Public Access (Cloudflare Tunnel)
+## 4️⃣ 公網分享 | Public Access (Cloudflare Tunnel)
 
 若要讓老師/同學從外網直接連線，可使用 **Cloudflare Tunnel**。
 
