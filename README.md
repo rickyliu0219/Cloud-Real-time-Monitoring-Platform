@@ -24,11 +24,18 @@ and CRUD functions (add/edit/delete) for equipment management.
 
 1️⃣ 安裝環境 | Setup Environment
 ```bash
+在檔案資料夾路徑打powershell並開啟powershell(可直接導入Cloud-monitoring-platform資料夾)
+
 # 建立虛擬環境
 python -m venv .venv
 
 # 啟動虛擬環境 (Windows PowerShell)
 .\.venv\Scripts\Activate.ps1
+
+##PowerShell 執行政策限制（導致 Activate.ps1 不能執行）
+看到像「無法載入檔案 … Activate.ps1」就是這個問題。
+解法（只需做一次）：
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 # 安裝依賴
 pip install -r requirements.txt
