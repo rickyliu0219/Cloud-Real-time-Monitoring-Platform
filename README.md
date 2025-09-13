@@ -65,10 +65,8 @@ Smart-Factory-Monitoring-System/
 │
 └─ database.db         # SQLite 資料庫 (執行後產生)
 
-產生虛擬數據:
-
+##📊產生虛擬數據 | Generate Virtual Data:
 開新視窗啟動 venv 後執行：
-
 python simulator.py
 
 
