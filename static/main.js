@@ -9,7 +9,7 @@ function animateValue(element, newValue) {
   element.classList.add("animate__fadeIn");
 }
 
-// 🟢 狀態更新
+// 🟢 更新狀態
 function updateStatus(status) {
   const dot = document.getElementById("statusDot");
   const text = document.getElementById("status");
@@ -45,7 +45,7 @@ function addAlert(level, message) {
   if (list.children.length > 5) list.removeChild(list.lastChild);
 }
 
-// 📊 渲染設備清單
+// 📊 讀取設備清單
 async function fetchEquipment() {
   const res = await fetch('/api/equipment');
   equipmentData = await res.json();
@@ -73,7 +73,7 @@ async function fetchEquipment() {
 async function addEquipment() {
   const input = document.getElementById("newEquipmentId");
   const id = input.value.trim();
-  if (!id) return alert("請輸入設備ID！");
+  if (!id) return alert("請輸入設備 ID！");
   await fetch('/api/equipment', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -86,7 +86,7 @@ async function addEquipment() {
 // ✏️ 編輯設備
 async function editEquipment(id) {
   const current = equipmentData.find(e => e.id === id);
-  const newId = prompt("修改設備ID：", current.equipment_id);
+  const newId = prompt("修改設備 ID：", current.equipment_id);
   if (newId && newId.trim() !== "") {
     await fetch(`/api/equipment/${id}`, {
       method: "PUT",
@@ -99,13 +99,13 @@ async function editEquipment(id) {
 
 // 🗑️ 刪除設備
 async function deleteEquipment(id) {
-  if (confirm("確定要刪除嗎？")) {
+  if (confirm("確定要刪除這個設備嗎？")) {
     await fetch(`/api/equipment/${id}`, { method: "DELETE" });
     fetchEquipment();
   }
 }
 
-// 📈 摘要
+// 📈 摘要數據
 async function fetchSummary() {
   try {
     const res = await fetch('/api/summary', { cache: 'no-store' });
@@ -122,10 +122,20 @@ async function fetchSummary() {
 // 📉 趨勢圖
 async function fetchMetrics() {
   try {
-    const res = await fetch('/api/metrics?limit=20', { cache: 'no-store' });
+    const range = document.getElementById("timeRange")?.value || "realtime";
+    const res = await fetch(`/api/metrics?range=${range}`, { cache: 'no-store' });
     const { items } = await res.json();
 
-    const labels = items.map(m => new Date(m.ts).toLocaleTimeString());
+    const labels = items.map(m => {
+      const ts = new Date(m.ts);
+      if (range === "realtime") return ts.toLocaleTimeString(); // 即時顯示時分秒
+      if (range === "5m") return ts.toLocaleTimeString();
+      if (range === "1h") return ts.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      if (range === "1d") return ts.getHours() + ":00";
+      if (range === "1mo") return ts.toLocaleDateString();
+      return ts.toLocaleTimeString();
+    });
+
     const data = items.map(m => m.production);
 
     if (!chart) {
@@ -146,12 +156,10 @@ async function fetchMetrics() {
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
+          plugins: { legend: { display: false } },
           scales: {
             x: { title: { display: true, text: '時間' } },
-            y: { title: { display: true, text: '產量 (pcs)' } }
+            y: { title: { display: true, text: '產量 (件)' }, beginAtZero: true }
           }
         }
       });

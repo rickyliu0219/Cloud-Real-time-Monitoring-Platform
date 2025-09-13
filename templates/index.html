@@ -3,254 +3,102 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>雲端即時監控平台</title>
+  <title>雲端智慧工廠監控平台</title>
 
-  <!-- 字型 & Icon -->
+  <!-- Icons & Animation -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <!-- 動畫 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      color: #111827;
-    }
-
-    /* KPI 卡片區 */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px rgba(0,0,0,.1);
-      text-align: center;
-      border: 3px solid transparent;
-      transition: transform .2s, border-color .2s;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-    }
-
-    .icon {
-      font-size: 40px;
-      margin-bottom: 10px;
-    }
-
-    .title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 8px;
-    }
-
-    .value {
-      font-size: 32px;
-      font-weight: 700;
-      color: #111827;
-    }
-
-    .muted {
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    /* 折線圖容器 */
-    .chart-container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    }
-
-    /* 告警區塊 */
-    .alerts {
-      max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    }
-
-    .alert {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 8px;
-      font-weight: 600;
-    }
-
-    .alert.error {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-
-    .alert.warn {
-      background: #fef9c3;
-      color: #92400e;
-    }
-
-    .alert.info {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-
-    /* 設備清單 */
-    .equipment-table {
-      max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: center;
-    }
-
-    th {
-      background: #f3f4f6;
-      font-weight: 600;
-    }
-
-    /* Footer */
-    footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 14px;
-      color: #9ca3af;
-    }
+    body { font-family: "Microsoft JhengHei", sans-serif; background: linear-gradient(135deg, #e0f2fe, #f0fdf4); margin:0; padding:20px;}
+    h1 { text-align:center; margin-bottom:30px; color:#111827;}
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; max-width:1000px; margin:auto;}
+    .card { background:white; padding:20px; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,.1); text-align:center; border:3px solid transparent; transition:transform .2s,border-color .2s;}
+    .card:hover { transform:translateY(-5px);}
+    .icon { font-size:40px; margin-bottom:10px;}
+    .title { font-size:18px; font-weight:600; color:#374151; margin-bottom:8px;}
+    .value { font-size:32px; font-weight:700; color:#111827;}
+    .muted { color:#6b7280; font-size:14px;}
+    .chart-container,.alerts,.equipment-table { max-width:900px; margin:20px auto; background:white; padding:20px; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,.1);}
+    table { width:100%; border-collapse:collapse; margin-top:10px;}
+    th,td { padding:10px; border-bottom:1px solid #e5e7eb; text-align:center;}
+    th { background:#f3f4f6; font-weight:600;}
+    .alert { padding:10px; margin:5px 0; border-radius:8px; font-weight:600;}
+    .alert.error { background:#fee2e2; color:#b91c1c;}
+    .alert.warn { background:#fef9c3; color:#92400e;}
+    .alert.info { background:#dbeafe; color:#1e40af;}
+    footer { margin-top:40px; text-align:center; font-size:14px; color:#9ca3af;}
   </style>
 </head>
 <body>
-  <!-- 頁面標題 -->
-  <h1>
-    <i class="fa-solid fa-industry"></i>
-    雲端即時監控平台
-  </h1>
+  <h1><i class="fa-solid fa-industry"></i> 雲端智慧工廠監控平台</h1>
 
-  <!-- KPI 卡片區 -->
+  <!-- KPI -->
   <div class="grid">
-    <!-- 今日產量 -->
     <div class="card" style="border-color:#3b82f6;">
-      <div class="icon" style="color:#3b82f6;">
-        <i class="fa-solid fa-boxes-stacked"></i>
-      </div>
-      <div class="title">今日產量</div>
+      <div class="icon" style="color:#3b82f6;"><i class="fa-solid fa-boxes-stacked"></i></div>
+      <div class="title">當日產量</div>
       <div id="dailyProduction" class="value animate__animated">--</div>
-      <div class="muted">pcs</div>
+      <div class="muted">單位: 件</div>
     </div>
-
-    <!-- 效率 -->
     <div class="card" style="border-color:#10b981;">
-      <div class="icon" style="color:#10b981;">
-        <i class="fa-solid fa-gauge-high"></i>
-      </div>
+      <div class="icon" style="color:#10b981;"><i class="fa-solid fa-gauge-high"></i></div>
       <div class="title">效率</div>
       <div id="efficiency" class="value animate__animated">--</div>
       <div class="muted">0.00 ~ 1.00</div>
     </div>
-
-    <!-- 設備狀態 -->
     <div class="card" id="statusCard">
-      <div class="icon">
-        <i class="fa-solid fa-gears"></i>
-      </div>
+      <div class="icon"><i class="fa-solid fa-gears"></i></div>
       <div class="title">設備狀態</div>
       <div class="value animate__animated">
         <span id="statusDot" style="font-size:20px;">⚪</span>
         <span id="status">--</span>
       </div>
-      <div class="muted">RUN / IDLE / ERROR</div>
+      <div class="muted">運行 / 待機 / 異常</div>
     </div>
   </div>
 
-  <!-- 折線圖 -->
+  <!-- Chart -->
   <div class="chart-container">
-    <h2 style="text-align:center; color:#374151; margin-bottom:20px;">
-      📈 產量趨勢
-    </h2>
+    <h2 style="text-align:center; color:#374151; margin-bottom:20px;">📈 產量趨勢</h2>
+    <div style="text-align:center; margin-bottom:10px;">
+      <label for="timeRange">時間範圍: </label>
+      <select id="timeRange" onchange="fetchMetrics()">
+        <option value="realtime">即時</option>
+        <option value="5m">最近 5 分鐘</option>
+        <option value="1h">最近 1 小時</option>
+        <option value="1d">最近 1 天</option>
+        <option value="1mo">最近 1 個月</option>
+      </select>
+    </div>
     <canvas id="productionChart"></canvas>
   </div>
 
-  <!-- 告警區 -->
+  <!-- Alerts -->
   <div class="alerts">
-    <h2>
-      <i class="fa-solid fa-bell"></i>
-      即時告警
-    </h2>
-    <div id="alertsList">
-      <p class="muted">目前沒有告警。</p>
-    </div>
+    <h2><i class="fa-solid fa-bell"></i> 告警</h2>
+    <div id="alertsList"><p class="muted">目前沒有告警。</p></div>
   </div>
 
-  <!-- 設備清單 -->
+  <!-- Equipment -->
   <div class="equipment-table">
-    <h2>
-      <i class="fa-solid fa-list"></i>
-      設備清單
-    </h2>
-
-    <!-- 新增設備 -->
+    <h2><i class="fa-solid fa-list"></i> 設備清單</h2>
     <div style="margin-bottom:10px; text-align:right;">
-      <input id="newEquipmentId"
-             type="text"
-             placeholder="輸入新設備ID"
-             style="padding:5px; border:1px solid #d1d5db; border-radius:6px;">
-      <button onclick="addEquipment()"
-              style="padding:6px 10px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
-        ➕ 新增
-      </button>
+      <input id="newEquipmentId" type="text" placeholder="輸入設備 ID" style="padding:5px; border:1px solid #d1d5db; border-radius:6px;">
+      <button onclick="addEquipment()" style="padding:6px 10px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">➕ 新增</button>
     </div>
-
     <table>
       <thead>
         <tr>
-          <th>設備ID</th>
-          <th>狀態</th>
-          <th>產量</th>
-          <th>效率</th>
-          <th>操作</th>
+          <th>設備ID</th><th>狀態</th><th>產量</th><th>效率</th><th>操作</th>
         </tr>
       </thead>
       <tbody id="equipmentTableBody"></tbody>
     </table>
   </div>
 
-  <!-- 頁尾 -->
-  <footer>
-    <p>© 2025 Smart Factory Monitoring System</p>
-  </footer>
-
-  <!-- JS -->
+  <footer><p>© 2025 雲端智慧工廠監控平台</p></footer>
   <script src="/static/main.js"></script>
 </body>
 </html>
