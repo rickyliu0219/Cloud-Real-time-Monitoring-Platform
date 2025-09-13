@@ -72,6 +72,35 @@ python simulator.py
 
 ---
 
+## 4️⃣ 外網分享 | Public Access (Cloudflare Tunnel)
+
+若要讓老師/同學從外網直接連線，可使用 **Cloudflare Tunnel**。
+
+### Windows
+
+安裝 cloudflared（只需一次）：
+
+```powershell
+winget install --id Cloudflare.cloudflared -e
+```
+
+啟動公開連線：
+
+```powershell
+cloudflared tunnel --url http://127.0.0.1:8000
+```
+
+執行後會產生一個網址，例如：
+
+```
+https://xxxx-xxxx-xxxx.trycloudflare.com
+```
+
+把這個網址分享給對方即可。
+⚠️ 注意：cmd視窗要保持開啟，網址是臨時的，每次啟動會更換。
+
+---
+
 ## 📂 專案結構 | Project Structure
 
 ```
@@ -101,9 +130,4 @@ Smart-Factory-Monitoring-System/
 禹寬 (YU KUAN)
 📧 Email: [U1222342@o365.nuu.edu.tw](mailto:U1222342@o365.nuu.edu.tw)
 
-```
-
----
-
-要不要我再幫你加一個 **「外網分享（Cloudflare Tunnel）」章節**？這樣老師即使不在同一個網路，也能直接打開你跑的伺服器。
 ```
