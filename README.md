@@ -76,4 +76,3 @@ python simulator.py
 
 禹寬 (YU KUAN)
 📧 Email: U1222342@o365.nuu.edu.tw
-🌐 GitHub: https://github.com/rickyliu0219
