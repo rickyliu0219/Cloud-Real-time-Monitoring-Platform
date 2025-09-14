@@ -1,10 +1,10 @@
 # simulator.py
-# 事件驅動、更真實的產線模擬：Poisson 故障/待機、MTBF/MTTR、班別倍率、報廢率、個體差異
+# 事件驅動、產線模擬：Poisson 故障/待機、MTBF/MTTR、班別倍率、報廢率、個體差異
 import time
 import random
 import datetime as dt
-from typing import Dict
 
+from typing import Dict
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
 from models import EquipmentMetric, Equipment
@@ -13,8 +13,8 @@ from models import EquipmentMetric, Equipment
 TICK_SECONDS = 5                       # 每幾秒產生一批資料
 DEFAULT_EQUIP_IDS = ["M1", "M2", "M3", "M4"]
 
-BASE_MEAN_UNITS = 10                   # RUN 每個 tick 的平均毛產量（件）
-BASE_STD_UNITS  = 3                    # RUN 產量標準差（波動大小）
+BASE_MEAN_UNITS = 10                   # RUN 狀態下平均產量
+BASE_STD_UNITS  = 3                    # RUN 產量波動（波動大小）
 RECOVERY_BOOST  = 1.35                 # 故障/待機剛恢復的瞬間加成（一次）
 
 # 故障/待機行為（每台機器會各自抽樣不同參數，增加異質性）
@@ -34,15 +34,15 @@ RANDOM_SEED = None  # 若要可重現，改成數字例如 42
 # next_idle_at: 下一次待機開始的時間（只在 RUN 下會觸發）
 # factor: 機器個體產能差異 0.85~1.15
 # params: 該機器的 MTBF/MTTR/IDLE 間隔（秒）
-STATE: Dict[str, Dict] = {}
+
+STATE: Dict[str, Dict] = {} # 用來記錄每台設備的當前狀態
 
 if RANDOM_SEED is not None:
     random.seed(RANDOM_SEED)
 
 Base.metadata.create_all(bind=engine)
 
-
-# ====== 輔助 ======
+# 用「指數分布」抽樣，模擬「隨機事件間隔」（像故障）。
 def exp_sample(mean_seconds: float) -> float:
     """指數分佈抽樣（平均 mean_seconds）"""
     if mean_seconds <= 0:
@@ -52,21 +52,24 @@ def exp_sample(mean_seconds: float) -> float:
 def shift_multiplier(now_utc: dt.datetime) -> float:
     """簡易班別倍率（UTC 時間近似）：凌晨/深夜低、午餐低、白天高"""
     h = now_utc.hour
-    if 0 <= h < 7:  return 0.6
-    if 7 <= h < 12: return 1.0
-    if 12 <= h < 13:return 0.4
-    if 13 <= h < 18:return 1.0
-    if 18 <= h < 22:return 0.8
-    return 0.6
+    if 0 <= h < 7:  return 0.6  # 凌晨產量少
+    if 7 <= h < 12: return 1.0  # 白天正常
+    if 12 <= h < 13:return 0.4  # 午餐休息
+    if 13 <= h < 18:return 1.0  # 下午正常
+    if 18 <= h < 22:return 0.8  # 晚班稍低
+    return 0.6                  # 深夜再降低
 
-def ensure_equipments(db: Session):
+#模擬班別不同的產能差異
+def ensure_equipments(db: Session):     
+    # 確保 DB 裡有設備 M1~M4，沒有的話自動建立
     existing = {e.equipment_id for e in db.query(Equipment).all()}
     for eid in DEFAULT_EQUIP_IDS:
         if eid not in existing:
             db.add(Equipment(equipment_id=eid, status="RUN", production=0, efficiency=0.9))
     db.commit()
 
-def last_prod_today(db: Session, eid: str, now_utc: dt.datetime) -> int:
+def last_prod_today(db: Session, eid: str, now_utc: dt.datetime) -> int:    
+    # 查詢今天該機器的最後一筆生產數量，避免累積數據歸零  
     start_of_day = dt.datetime.combine(now_utc.date(), dt.time.min)
     last = (
         db.query(EquipmentMetric)
@@ -192,7 +195,4 @@ if __name__ == "__main__":
         time.sleep(TICK_SECONDS)
 
 
-#故障更少：把 MTBF_HOURS_RANGE 調大（例如 (12, 36)）
-#修更久：把 MTTR_MINUTES_RANGE 調大（例如 (5, 15)）
-#待機更常：把 IDLE_MEAN_INTERVAL_MIN_RANGE 調小（例如 (10, 30)）
-#波動更大：把 BASE_STD_UNITS 調大（例如 4~6)
+

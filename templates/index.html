@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>雲端智慧工廠監控平台</title>
 
-  <!-- Icons & Animation -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,15 +19,44 @@
     .title { font-size:18px; font-weight:600; color:#374151; margin-bottom:8px;}
     .value { font-size:32px; font-weight:700; color:#111827;}
     .muted { color:#6b7280; font-size:14px;}
-    .chart-container,.alerts,.equipment-table { max-width:900px; margin:20px auto; background:white; padding:20px; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,.1);}
+
+    .chart-container,.alerts,.equipment-table,.maint { max-width:900px; margin:20px auto; background:white; padding:20px; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,.1);}
+    .chart-container canvas{ max-height: 420px; }
     table { width:100%; border-collapse:collapse; margin-top:10px;}
     th,td { padding:10px; border-bottom:1px solid #e5e7eb; text-align:center;}
     th { background:#f3f4f6; font-weight:600;}
     .alert { padding:10px; margin:5px 0; border-radius:8px; font-weight:600;}
     .alert.error { background:#fee2e2; color:#b91c1c;}
-    .alert.warn { background:#fef9c3; color:#92400e;}
     .alert.info { background:#dbeafe; color:#1e40af;}
+    .alert.ok { background:#dcfce7; color:#166534;}
     footer { margin-top:40px; text-align:center; font-size:14px; color:#9ca3af;}
+    .toolbar { display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px;}
+    select, input[type="text"] { padding:6px 8px; border:1px solid #d1d5db; border-radius:8px; }
+    #rtOpts{ display:none; }
+    button{ cursor:pointer; }
+
+    /* 維修兩階段視圖 */
+    .maint-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+    .btn-back { padding:6px 10px; border:none; border-radius:8px; background:#e5e7eb; color:#111827; }
+    .btn-back:hover { background:#d1d5db; }
+    .device-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:12px; }
+    .device-chip {
+      display:flex; align-items:center; justify-content:center;
+      background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:14px;
+      font-weight:700; color:#111827; transition:transform .15s, box-shadow .15s, border-color .15s;
+    }
+    .device-chip:hover { transform:translateY(-3px); box-shadow:0 6px 12px rgba(0,0,0,.08); border-color:#cbd5e1; }
+    .badge { margin-left:6px; background:#ef4444; color:white; border-radius:999px; padding:2px 8px; font-size:12px; }
+    .badge-ok { background:#10b981; }
+    .subtle { color:#6b7280; font-size:12px; margin-top:4px; }
+
+    /* 固定浮動返回鍵（細部頁顯示） */
+    #floatingBack {
+      display:none; position:fixed; right:20px; bottom:20px; z-index:9999;
+      border:none; border-radius:999px; background:#111827; color:#fff; padding:12px 14px;
+      box-shadow:0 8px 16px rgba(0,0,0,.2);
+    }
+    #floatingBack:hover { background:#374151; }
   </style>
 </head>
 <body>
@@ -61,16 +89,38 @@
 
   <!-- Chart -->
   <div class="chart-container">
-    <h2 style="text-align:center; color:#374151; margin-bottom:20px;">📈 產量趨勢</h2>
-    <div style="text-align:center; margin-bottom:10px;">
-      <label for="timeRange">時間範圍: </label>
-      <select id="timeRange" onchange="fetchMetrics()">
-        <option value="realtime">即時</option>
-        <option value="5m">最近 5 分鐘</option>
-        <option value="1h">最近 1 小時</option>
-        <option value="1d">最近 1 天</option>
-        <option value="1mo">最近 1 個月</option>
-      </select>
+    <h2 style="text-align:center; color:#374151; margin-bottom:12px;">📈 產量趨勢</h2>
+    <div class="toolbar">
+      <label>時間範圍：
+        <select id="timeRange" onchange="fetchMetrics(true)">
+          <option value="realtime" selected>即時</option>
+          <option value="5m">最近 5 分鐘</option>
+          <option value="1h">最近 1 小時</option>
+          <option value="1d">最近 1 天</option>
+          <option value="1mo">最近 1 個月</option>
+        </select>
+      </label>
+      <label>資料視圖：
+        <select id="seriesMode" onchange="fetchMetrics()">
+          <option value="total" selected>總量（加總）</option>
+          <option value="perEqp">各機（多折線）</option>
+        </select>
+      </label>
+      <label>顯示模式：
+        <select id="valueMode" onchange="fetchMetrics()">
+          <option value="cumulative" selected>累積</option>
+          <option value="delta">每批增量</option>
+        </select>
+      </label>
+      <span id="rtOpts">
+        <label>顯示點數（即時）：
+          <select id="realtimePoints" onchange="onRealtimePointsChange()">
+            <option value="20">20</option>
+            <option value="40" selected>40</option>
+            <option value="60">60</option>
+          </select>
+        </label>
+      </span>
     </div>
     <canvas id="productionChart"></canvas>
   </div>
@@ -81,12 +131,50 @@
     <div id="alertsList"><p class="muted">目前沒有告警。</p></div>
   </div>
 
+  <!-- 維修紀錄：兩階段視圖 -->
+  <div class="maint">
+    <h2><i class="fa-solid fa-screwdriver-wrench"></i> 維修紀錄</h2>
+
+    <!-- 第一頁：設備清單 -->
+    <div id="maintViewList">
+      <p class="subtle">點選設備查看詳細維修紀錄（最近 24 小時）。</p>
+      <div id="maintDeviceGrid" class="device-grid"></div>
+    </div>
+
+    <!-- 第二頁：某一設備的詳細紀錄 -->
+    <div id="maintViewDetail" style="display:none;">
+      <div class="maint-header">
+        <button class="btn-back" onclick="maintShowList()">← 返回設備清單</button>
+        <h3 id="maintTitle" style="margin:0;">設備 維修紀錄</h3>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>故障開始</th>
+            <th>恢復時間</th>
+            <th>維修時長</th>
+          </tr>
+        </thead>
+        <tbody id="maintDetailBody"></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2" style="text-align:right;">合計維修時長：</th>
+            <th id="maintTotalDur">-</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- 固定浮動返回鍵（任何位置都能回第一頁） -->
+  <button id="floatingBack" title="返回維修設備清單" onclick="maintShowList()">↩</button>
+
   <!-- Equipment -->
   <div class="equipment-table">
     <h2><i class="fa-solid fa-list"></i> 設備清單</h2>
     <div style="margin-bottom:10px; text-align:right;">
-      <input id="newEquipmentId" type="text" placeholder="輸入設備 ID" style="padding:5px; border:1px solid #d1d5db; border-radius:6px;">
-      <button onclick="addEquipment()" style="padding:6px 10px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">➕ 新增</button>
+      <input id="newEquipmentId" type="text" placeholder="輸入設備 ID">
+      <button onclick="addEquipment()" style="padding:6px 10px; background:#2563eb; color:white; border:none; border-radius:6px;">➕ 新增</button>
     </div>
     <table>
       <thead>
@@ -98,7 +186,9 @@
     </table>
   </div>
 
-  <footer><p>© 2025 雲端智慧工廠監控平台</p></footer>
-  <script src="/static/main.js"></script>
+  <footer><p>© 2025 雲端智慧工廠監控平台 由劉禹寬製作</p></footer>
+
+  <!-- 加版本參數避免快取 -->
+  <script src="/static/main.js?v=maint2-20250913"></script>
 </body>
 </html>
