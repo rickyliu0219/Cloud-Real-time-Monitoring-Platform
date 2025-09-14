@@ -57,13 +57,14 @@ uvicorn app:app --reload
 
 ```text
 start.bat → 啟動伺服器
+start_all.bat → 啟動伺服器(含simulator.py)
 stop.bat  → 停止伺服器
 ```
 
 ### (c) 一鍵啟動 / 停止 (僅限 mac)
 
 ```text
-start_all.sh → 啟動伺服器
+start_all.sh → 啟動伺服器(含simulator.py)
 stop.sh      → 停止伺服器
 ```
 
