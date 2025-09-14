@@ -60,6 +60,13 @@ start.bat → 啟動伺服器
 stop.bat  → 停止伺服器
 ```
 
+### (c) 一鍵啟動 / 停止 (僅限 mac)
+
+```text
+start_all.sh → 啟動伺服器
+stop.sh      → 停止伺服器
+```
+
 ---
 
 ## 3️⃣ 產生虛擬數據 | Generate Virtual Data
