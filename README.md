@@ -119,8 +119,12 @@ Smart-Factory-Monitoring-System/
 ├─ database.py         # 資料庫連線
 ├─ simulator.py        # 模擬數據產生器
 ├─ requirements.txt    # 依賴套件
+│
 ├─ start.bat           # 一鍵啟動 (Windows)
+├─ start_all.bat       # 一鍵啟動含simulator.py (Windows)
 ├─ stop.bat            # 一鍵停止 (Windows)
+├─ start_all.sh        # 一鍵啟動含simulator.py (mac)
+├─ stop.sh             # 一鍵停止 (mac)
 │
 ├─ templates/
 │   └─ index.html      # 前端 HTML 模板
